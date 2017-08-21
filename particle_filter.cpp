@@ -143,7 +143,6 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> inRangeLandmarks,
 
 	for (int i=0; i < observations.size(); i++)
 	{
-
 		// find the nearest landmark for this observation
 		for(int l=0; l < inRangeLandmarks.size(); l++)
 		{
@@ -193,6 +192,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 	for (int i = 0; i < num_particles; i++)
 	{
 		Particle prtcl = particles[i];
+		cout << "UW : inRangeLandmark id = ";
 
 		// ---------------------------------------------------------------
 		// Save landmarks that are within sensor range of the particle 
@@ -212,9 +212,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 				single_LM.id = map_landmarks.landmark_list[l].id_i;
 				inRangeLandmarks.push_back( single_LM);
 
-				cout << "UW : inRangeLandmark id = " << single_LM.id << "\n";
+				cout  << single_LM.id << "  ";
 			}
 		} // for l
+		cout << "\n";
 
 
 		//--------------------------------------------------------------------------
@@ -269,11 +270,11 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 		// # calculate weight using normalization terms and exponent
 		// weight= gauss_norm * math.exp(-exponent)
 		//-------------------------------------------------------------------------
-		
+		particles[i].weight = 1.0;
+
 		// From the set of observations which now have landmarkIDs, 
 		for(int t=0; t < transformed_obs.size(); t++)
 		{
-			// double weight = 1.0;
 			for (int l=0; l < inRangeLandmarks.size(); l++)
 			{
 				//let find the landmark that is seen by this observation
@@ -283,19 +284,23 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 					double gauss_norm = (1/(2 * M_PI * std_landmark[0] * std_landmark[1]));
 					// cout << "gauss_norm = " << gauss_norm << "\t";
 
-					double xexp = pow( (prtcl.x - transformed_obs[t].x), 2) / 
+					double xexp = pow( (transformed_obs[t].x) - inRangeLandmarks[l].x, 2) / 
 														(2*pow(std_landmark[0], 2));
-					cout << "prctl.x = " << prtcl.x << "\t" 
-						 << "transformed_obs[t].x  = " << transformed_obs[t].x << "\t" << "xexp = " << xexp << "\n";
+										
+					cout << "inRangeLandmarks[l].x = " << inRangeLandmarks[l].x  << "\t" 
+						 << "transformed_obs[t].x  = " << transformed_obs[t].x << "\t" 
+						 << "xexp = " << xexp << "\n";
 
-					double yexp = pow( (prtcl.y - transformed_obs[t].y), 2) / 
+					double yexp = pow( (transformed_obs[t].y - inRangeLandmarks[l].y), 2) / 
 														(2*pow(std_landmark[1], 2));
-					cout << "prctl.y = " << prtcl.y << "\t" 
-						 << "transformed_obs[t].y  = " << transformed_obs[t].y << "\t" << "yexp = " << yexp << "\n";
+					cout << "inRangeLandmarks[l].y = " << inRangeLandmarks[l].y << "\t" 
+						 << "transformed_obs[t].y  = " << transformed_obs[t].y << "\t" 
+						 << "yexp = " << yexp << "\n";
 
 
 					double weight = gauss_norm * exp(-(xexp +yexp));
-					cout << "weight = " << weight << "particle[i].weight = " << particles[i].weight << "\n";
+
+					cout << "weight = " << weight << "\t" << "particle[i].weight = " << particles[i].weight << "\n";
 
 					particles[i].weight *= weight; 
 
