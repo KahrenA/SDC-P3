@@ -28,9 +28,8 @@ void ParticleFilter::init(double x, double y, double theta, double std[])
 	// all weights to 1. 
 	// Add random Gaussian noise to each particle.
 
-	std::cout << "In ParticleFilter::Init \n";
+	//std::cout << "In ParticleFilter::Init \n";
 
-	// normal dist = (1/(sqrt(std*2PI)) exp (-1/2)( sq((x-ux)/std) )
 	std::normal_distribution<double> noise_x (0, std[0]);
 	std::normal_distribution<double> noise_y (0, std[1]);
 	std::normal_distribution<double> noise_t (0, std[2]);
@@ -71,9 +70,9 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
 	// NOTE: When adding noise you may find std::normal_distribution and 
 	//std::default_random_engine useful.
 	
-	std::cout << "In ParticleFilter::prediction\n\n";
-	std::cout << "velocity = " << velocity << "\t" << "yaw_rate " << yaw_rate 
-					<< "delta_t = " << delta_t << "\n"; 
+	//std::cout << "In ParticleFilter::prediction\n\n";
+	//std::cout << "velocity = " << velocity << "\t" << "yaw_rate " << yaw_rate 
+	//				<< "delta_t = " << delta_t << "\n"; 
 
 	double new_x, new_y, new_t; 
 	normal_distribution<double> noise_x(0, std_pos[0]);
@@ -85,7 +84,7 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
 	{
 		Particle prtcl = particles[i];
 
-		if(yaw_rate < 0.001)
+		if(fabs(yaw_rate) < 0.00001)
 		{
 			new_x = prtcl.x + velocity * delta_t * cos(prtcl.theta);
 			new_y = prtcl.y + velocity * delta_t * sin(prtcl.theta); 
@@ -110,14 +109,14 @@ void ParticleFilter::prediction(double delta_t, double std_pos[],
 		prtcl.y += noise_y(rand_gen);
 		prtcl.theta += noise_t(rand_gen);
 
-		std::cout << "new_x = " << prtcl.x << "\t" << "new_y = " << prtcl.y << "\t" 
-									<< "new_theta = " << prtcl.theta << "\n";
+		//std::cout << "new_x = " << prtcl.x << "\t" << "new_y = " << prtcl.y << "\t" 
+		//							<< "new_theta = " << prtcl.theta << "\n";
 
 		particles[i] = prtcl;   // save 
 		
 	}	// for each particle
 
-	std::cout << "\n\n";
+	//std::cout << "\n\n";
 }
 
 //*********************************************************************
@@ -138,11 +137,11 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> inRangeLandmarks,
 									 std::vector<LandmarkObs>& observations) 
 {
 	
-	double min_dist_so_far = std::numeric_limits<double>::max();
-	int lm_id=-1;
-
 	for (int i=0; i < observations.size(); i++)
 	{
+		double min_dist_so_far = std::numeric_limits<double>::max();
+		int lm_id=-1;
+
 		// find the nearest landmark for this observation
 		for(int l=0; l < inRangeLandmarks.size(); l++)
 		{
@@ -162,7 +161,7 @@ void ParticleFilter::dataAssociation(std::vector<LandmarkObs> inRangeLandmarks,
 		// Save the Id of landmark closest to observation
 		observations[i].id = lm_id;
 
-		cout << "Associated LM ID: " << lm_id << "\t" << "with Observation : " << i << "\n";
+		//cout << "Associated LM ID: " << lm_id << "\t" << "with Observation : " << i << "\n";
 
 	} //for i obs
 	
@@ -186,13 +185,13 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 {
 	// TODO: Update the weights of each particle using a mult-variate Gaussian distribution. 
 
-	std::cout << "In UpdateWeights \n";
+	//std::cout << "In UpdateWeights \n";
 
 	// let's compare particle's distance to landmark with observation's 
 	for (int i = 0; i < num_particles; i++)
 	{
 		Particle prtcl = particles[i];
-		cout << "UW : inRangeLandmark id = ";
+		//cout << "UW : inRangeLandmark id = ";
 
 		// ---------------------------------------------------------------
 		// Save landmarks that are within sensor range of the particle 
@@ -212,10 +211,10 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 				single_LM.id = map_landmarks.landmark_list[l].id_i;
 				inRangeLandmarks.push_back( single_LM);
 
-				cout  << single_LM.id << "  ";
+				//cout  << single_LM.id << "  ";
 			}
 		} // for l
-		cout << "\n";
+		//cout << "\n";
 
 
 		//--------------------------------------------------------------------------
@@ -245,7 +244,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 			single_translated_observation.y = trans_y;
 			single_translated_observation.id = observations[t].id;
 
-			cout << "OBSs: trans_x = " << trans_x << "\t" << "trans_y = " << trans_y << "\n";
+			//cout << "OBSs: trans_x = " << trans_x << "\t" << "trans_y = " << trans_y << "\n";
 			transformed_obs.push_back(single_translated_observation);
 		}
 
@@ -287,24 +286,24 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 					double xexp = pow( (transformed_obs[t].x) - inRangeLandmarks[l].x, 2) / 
 														(2*pow(std_landmark[0], 2));
 										
-					cout << "inRangeLandmarks[l].x = " << inRangeLandmarks[l].x  << "\t" 
-						 << "transformed_obs[t].x  = " << transformed_obs[t].x << "\t" 
-						 << "xexp = " << xexp << "\n";
+					//cout << "inRangeLandmarks[l].x = " << inRangeLandmarks[l].x  << "\t" 
+					//	 << "transformed_obs[t].x  = " << transformed_obs[t].x << "\t" 
+					//	 << "xexp = " << xexp << "\n";
 
 					double yexp = pow( (transformed_obs[t].y - inRangeLandmarks[l].y), 2) / 
 														(2*pow(std_landmark[1], 2));
-					cout << "inRangeLandmarks[l].y = " << inRangeLandmarks[l].y << "\t" 
-						 << "transformed_obs[t].y  = " << transformed_obs[t].y << "\t" 
-						 << "yexp = " << yexp << "\n";
+					//cout << "inRangeLandmarks[l].y = " << inRangeLandmarks[l].y << "\t" 
+					//	 << "transformed_obs[t].y  = " << transformed_obs[t].y << "\t" 
+					//	 << "yexp = " << yexp << "\n";
 
 
 					double weight = gauss_norm * exp(-(xexp +yexp));
 
-					cout << "weight = " << weight << "\t" << "particle[i].weight = " << particles[i].weight << "\n";
+					//cout << "weight = " << weight << "\t" << "particle[i].weight = " << particles[i].weight << "\n";
 
 					particles[i].weight *= weight; 
 
-					cout << "New weight = " << particles[i].weight << "\n";
+					//cout << "New weight = " << particles[i].weight << "\n";
 
 					break;
 				}
@@ -335,7 +334,7 @@ void ParticleFilter::updateWeights(double sensor_range, double std_landmark[],
 void ParticleFilter::resample() 
 {
 	
-	std::cout << "In resample \n";
+	//std::cout << "In resample \n";
 	
 	double beta = 0.0;
 	vector <double> weights;
@@ -346,7 +345,7 @@ void ParticleFilter::resample()
 		weights.push_back(particles[i].weight);
 	}
 	double max_w = *max_element(weights.begin(), weights.end()); 
-	cout << "Max weight: "<<max_w << endl;
+	//cout << "Max weight: "<<max_w << endl;
 
 	//--------------------------
 	// Implement the wheel algo
